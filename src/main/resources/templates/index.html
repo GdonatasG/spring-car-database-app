@@ -1,0 +1,394 @@
+﻿<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>CarDatabase</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.5.0/css/all.min.css"/>
+    <link rel="stylesheet" type="text/css" th:href="@{style.css}">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+<nav class="navbar sticky-top navbar-expand-md navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand logo" th:href="@{/}">CarDatabase</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form th:action="@{/filter}" class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Ieškoti automobilio"
+                           aria-label="Ieškoti automobilio" aria-describedby="Ieškoti automobilio" name="query"
+                           th:value="${query} ?: ''">
+                    <div class="input-group-append">
+                        <button class="btn btn-light" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </form>
+            <ul class="navbar-nav col justify-content-end">
+                <li sec:authorize="isAuthenticated()" class="nav-item">
+                    <a class="nav-link text-light text-center cBtn" href=""><i
+                            class="fas fa-plus-circle fa-lg"></i></a>
+                </li>
+                <li sec:authorize="isAnonymous()" class="nav-item">
+                    <a class="nav-link text-light text-center" th:href="login">Prisijungti</a>
+                </li>
+                <li sec:authorize="isAuthenticated()" class="nav-item">
+                    <a class="nav-link text-light text-center" th:href="@{/logout}">Atsijungti</a>
+                </li>
+                <li class="nav-item pl-md-2 text-center">
+                    <label for="themeModeSwitcher"></label>
+                    <input id="themeModeSwitcher" onchange="lightsSwitcher()" checked type="checkbox"
+                           data-toggle="toggle"
+                           data-onstyle="success" data-offstyle="danger"
+                           data-style="ios"
+                           data-on="<i class='far fa-sun'></i>"
+                           data-off="<i class='fas fa-sun'></i>">
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container-xxl page-bg min-vh-100">
+    <div th:if="${deleted}" class="alert alert-success alert-dismissible">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        Automobilis pašalintas!
+    </div>
+    <div th:if="${deleteError}" class="alert alert-danger alert-dismissible">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        Nepavyko pašalinti automobilio!
+    </div>
+    <div th:if="${saved}" class="alert alert-success alert-dismissible">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        Automobilis pridėtas!
+    </div>
+    <div th:if="${saveError}" class="alert alert-danger alert-dismissible">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        Nepavyko pridėti automobilio!
+    </div>
+    <div th:if="${updated}" class="alert alert-success alert-dismissible">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        Automobilio aprašymas atnaujintas!
+    </div>
+    <div th:if="${updateError}" class="alert alert-danger alert-dismissible">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        Nepavyko atnaujinti automobilio aprašymo!
+    </div>
+    <div class="container-fluid">
+        <div class="pt-3"></div>
+        <!-- CARS -->
+        <div th:each="car :${car.content}">
+            <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1 col-md-10 offset-md-1 col-12 carContainer">
+                <div class="row">
+                    <div class="col-lg-3 col-md-4 col-sm-5 col-6">
+                        <div class="limit">
+                            <a th:href="'javascript:showPictureModal(&quot'+${car.pictureUrl}+'&quot);'"><img
+                                    th:src="${car.pictureUrl}"
+                                    class="img-fluid"/> </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-9 col-md-8 col-sm-7 col-6">
+                        <div class="row carTitleContainer">
+                            <div class="col-9 carTitle modalContentColor"><span
+                                    th:text="|${car.brand} ${car.model}|"></span></div>
+                            <div class="col-1 offset-lg-2 offset-md-1 offset-0">
+                                <a class="nav-link text-dark detailsBtn"
+                                   th:href="@{car/(id=${car.id})}"><i
+                                        class="fas fa-chevron-right fa-lg modalContentColor"></i></a>
+                            </div>
+                        </div>
+                        <div class="row carDescriptionContainer">
+                            <div class="col-9 carDescription modalContentColor">
+                                <span th:text="${car.engineCapacityInL}"></span>L, <span th:text="${car.engine}"></span>,
+                                <span th:text="${car.year}"></span>m,
+                                <br/>
+                                <span th:text="${car.gearType}"></span>, <span th:text="${car.powerInKw}"></span>kW,
+                                <span th:text="${car.bodyType}"></span>
+                            </div>
+                        </div>
+                        <div class="row justify-content-start">
+                            <a class="nav-link text-success"
+                               th:href="|javascript:showVideoModal('${car.model}', '${car.brand}', '${car.videoUrl}')|"><i
+                                    class="fas fa-play-circle fa-lg"></i></a>
+                            <a class="nav-link text-warning gasBtn"
+                               th:href="@{car/(id=${car.id})}"><i
+                                    class="fas fa-gas-pump fa-lg"></i></a>
+                            <a class="nav-link text-dark eBtn" sec:authorize="isAuthenticated()"
+                               th:if="${#authentication.getPrincipal.id == car.creatorId}"
+                               th:href="@{car/(id=${car.id})}"><i
+                                    class="fas fa-marker fa-lg modalContentColor"></i></a>
+                            <a class="nav-link text-danger" sec:authorize="isAuthenticated()"
+                               th:if="${#authentication.getPrincipal.id == car.creatorId}"
+                               th:href="|javascript:showDeleteModal('${car.id}')|"><i
+                                    class="fas fa-trash fa-lg"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+            </div>
+        </div>
+        <!-- PAGINATION BUTTONS -->
+        <nav aria-label="..." class="row justify-content-center" style="margin-top: 10px;"
+             th:if="${car.totalPages} != null">
+            <ul class="pagination pagination-sm">
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, car.totalPages-1)}"
+                    th:classappend="${currentPage}==${i}?'active':''">
+                    <a class="page-link" th:href="@{/(page=${i+1})}" th:text="${i+1}" th:if="${query} == null"></a>
+                    <a class="page-link" th:href="@{'/filter?query='+${query}+'&amp;page='+${i+1}}" th:text="${i+1}"
+                       th:if="${query} != null"></a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Video Modal -->
+        <div class="modal fade" data-backdrop="static" id="videoModal" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <!-- Modal content-->
+                <div class="modal-content mModalContent">
+                    <div class="modal-header">
+                        <h3 id="videoTitle"></h3>
+                        <button onclick="stopVideo()" type="button" class="close modalContentColor"
+                                data-dismiss="modal">&times;
+                        </button>
+                    </div>
+                    <div class="row modal-body justify-content-center">
+                        <iframe id="videoPlayer" width="400" height="300" src="" frameborder="0" gesture="media"
+                                allow="encrypted-media" allowfullscreen></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <button onclick="stopVideo()" type="button" class="btn btn-default modalContentColor"
+                                data-dismiss="modal">Uždaryti
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Gas Modal -->
+        <div class="modal fade" data-backdrop="static" id="gasModal" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <!-- Modal content-->
+                <div class="modal-content mModalContent">
+                    <div class="modal-header">
+                        <h3 id="gasTitle"></h3>
+                        <button type="button" class="close modalContentColor"
+                                data-dismiss="modal">&times;
+                        </button>
+                    </div>
+                    <div class="row modal-body justify-content-center">
+                        <span id="gasBody"></span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default modalContentColor"
+                                data-dismiss="modal">Uždaryti
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Picture Modal -->
+        <div class="modal fade" id="pictureModal" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <!-- Modal content-->
+                <div class="modal-content mModalContent">
+                    <div class="modal-header">
+                        <button type="button" class="close modalContentColor" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="row modal-body justify-content-center">
+                        <img id="pictureInModal" class="img-fluid" src="" width="480" height="360"/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default modalContentColor" data-dismiss="modal">Uždaryti
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Car Delete Modal -->
+        <div class="modal fade" id="carDeleteModal" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <!-- Modal content-->
+                <div class="modal-content mModalContent">
+                    <div class="row modal-body justify-content-center">
+                        <h5 id="carDeleteDesc"></h5>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn btn-danger" id="delRef" href="">Taip</a>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Ne</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Car Create Modal -->
+        <form id="editCreateModalForm" method="post">
+            <div class="modal fade" data-backdrop="static" id="carCreateModal" role="dialog">
+                <div class="modal-dialog modal-dialog-centered">
+                    <!-- Modal content-->
+                    <div class="modal-content mModalContent">
+                        <div class="modal-header">
+                            <h3 id="editModalHeaderTitle">Pridėti automobilį</h3>
+                            <button type="button" class="close modalContentColor" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="col modal-body">
+                            <input th:type="hidden" id="id" name="id"/>
+                            <input th:type="hidden" id="creatorId" name="creatorId"/>
+                            <!-- Car title input -->
+                            <div class="form-outline mb-4">
+                                <label for="brand">Automobilio markė:</label>
+                                <input type="text" id="brand" name="brand" class="form-control"
+                                       placeholder="Pvz.: Toyota" required/>
+                            </div>
+
+                            <div class="form-outline mb-4">
+                                <label for="model">Automobilio modelis:</label>
+                                <input type="text" id="model" name="model" class="form-control"
+                                       placeholder="Pvz.: Corolla" required/>
+                            </div>
+
+                            <!-- Engine type input -->
+                            <div class="form-outline mb-4">
+                                <label for="engine">Variklio tipas:</label>
+                                <select class="form-control" id="engine" name="engine" required>
+                                    <option>Dyzelinas</option>
+                                    <option>Benzinas</option>
+                                    <option>Elektra</option>
+                                </select>
+                            </div>
+
+                            <!-- Power input -->
+                            <div class="form-outline mb-4">
+                                <label for="powerInKw">Galingumas kW:</label>
+                                <input type="number" id="powerInKw" name="powerInKw" maxlength="4" max="2000"
+                                       min="1" step="1"
+                                       placeholder="Pvz: 150" class="form-control" required/>
+                            </div>
+
+                            <!-- Engine capacity input -->
+                            <div class="form-outline mb-4">
+                                <label for="engineCapacityInL">Variklio litražas litrais (l):</label>
+                                <input type="number" id="engineCapacityInL" name="engineCapacityInL" maxlength="2"
+                                       max="10" min="0.1" step="0.1"
+                                       placeholder="Pvz.: 2.2" class="form-control" required/>
+                            </div>
+
+                            <!-- Type input -->
+                            <div class="form-outline mb-4">
+                                <label for="bodyType">Kėbulo tipas:</label>
+                                <select class="form-control" id="bodyType" name="bodyType" required>
+                                    <option>Sedanas</option>
+                                    <option>Universalas</option>
+                                    <option>Coupe</option>
+                                    <option>Hečbekas</option>
+                                </select>
+                            </div>
+
+                            <!-- Year input -->
+                            <div class="form-outline mb-4">
+                                <label for="year">Pagaminimo metai:</label>
+                                <input type="number" id="year" name="year" placeholder="Pvz.: 2003" class="form-control"
+                                       required/>
+                            </div>
+
+                            <!-- Gear type input -->
+                            <div class="form-outline mb-4">
+                                <label for="gearType">Pavarų dėžės tipas:</label>
+                                <select class="form-control" id="gearType" name="gearType" required>
+                                    <option>Automatinė</option>
+                                    <option>Mechaninė</option>
+                                    <option>Mišrus</option>
+                                </select>
+                            </div>
+
+                            <!-- Picture url input -->
+                            <div class="form-outline mb-4">
+                                <label for="pictureUrl">Nuotraukos nuoroda (url):</label>
+                                <input type="text" id="pictureUrl" name="pictureUrl"
+                                       placeholder="https://www.google.com/"
+                                       class="form-control" required/>
+                            </div>
+
+                            <!-- Video url input -->
+                            <div class="form-outline mb-4">
+                                <label for="videoUrl">Video nuoroda (url):</label>
+                                <input type="text" id="videoUrl" name="videoUrl"
+                                       placeholder="https://www.youtube.com/"
+                                       class="form-control" required/>
+                            </div>
+
+                            <!-- Description input -->
+                            <div class="form-outline mb-4">
+                                <label for="description">Pilnas aprašymas:</label>
+                                <textarea id="description" name="description" class="form-control mInput" rows="5"
+                                          required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="btnEditOrCreate" type="submit" class="btn btn-success">Pridėti</button>
+                            <button type="button" class="btn btn-info" data-dismiss="modal">Atšaukti</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+
+
+        <!-- Car Details Modal -->
+        <div class="modal fade" data-backdrop="static" id="carDetailsModal" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <!-- Modal content-->
+                <div class="modal-content mModalContent">
+                    <div class="modal-header">
+                        <h3 id="carDetailsTitle"></h3>
+                        <button onclick="stopVideoCarDetails()" type="button" class="close modalContentColor"
+                                data-dismiss="modal">&times;
+                        </button>
+                    </div>
+                    <div class="row modal-body justify-content-center" style="height: 220px;">
+                        <div class="col-6">
+                            <img id="carDetailsPicture" class="img-fluid" src=""/>
+                        </div>
+                        <div class="col-6">
+                            <iframe id="carDetailsVideoPlayer" class="img-fluid" src="" frameborder="0" gesture="media"
+                                    allow="encrypted-media" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    <div id="carDetailsInfo" class="row justify-content-center mb-2"></div>
+                    <div class="modal-footer">
+                        <button onclick="stopVideoCarDetails()" type="button" class="btn btn-default modalContentColor"
+                                data-dismiss="modal">Uždaryti
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+<script th:src="@{main.js}"></script>
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</body>
+</html>

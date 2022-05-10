@@ -1,0 +1,103 @@
+.logo {
+    font-weight: bold;
+}
+
+.mModalContent {
+    background-color: white;
+}
+
+.modalContentColor {
+    color: black;
+}
+
+.toggle.ios, .toggle-on.ios, .toggle-off.ios {
+    border-radius: 20px;
+}
+
+.toggle.ios .toggle-handle {
+    border-radius: 20px;
+}
+
+.carContainer {
+    max-height: 190px;
+    /*padding: 10px;*/
+    margin-bottom: 10px;
+}
+
+.carTitleContainer {
+    max-height: 80px;
+    overflow: hidden;
+}
+
+.carTitle {
+    font-weight: bold;
+    font-size: 14.5px;
+    color: black;
+}
+
+.carDescriptionContainer {
+    max-height: 95px;
+    overflow: hidden;
+}
+
+.carDescription {
+    font-size: 13px;
+    color: black;
+}
+
+@media (min-width: 576px) {
+    .carDescription {
+        font-size: 14.5px;
+    }
+    .carTitle {
+        font-size: 15.5px;
+    }
+}
+
+@media (min-width: 768px) {
+    .carDescription {
+        font-size: 15px;
+    }
+    .carTitle {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 992px) {
+    .carDescription {
+        font-size: 15.5px;
+    }
+    .carTitle {
+        font-size: 16.5px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .carDescription {
+        font-size: 16px;
+    }
+    .carTitle {
+        font-size: 17px;
+    }
+}
+
+.limit {
+    /*height: 190px;*/
+    max-height: 190px;
+    overflow: hidden;
+}
+
+.limit img {
+    width: 100%;
+    height: 100%;
+}
+
+.divider {
+    width: 100%;
+    height: 1px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #D1D1D1;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}

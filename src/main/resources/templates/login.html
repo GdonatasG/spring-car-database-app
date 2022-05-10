@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Prisijungimas</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+<nav class="navbar sticky-top navbar-expand-md navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand logo" th:href="@{/}"><i class="far fa-arrow-alt-circle-left fa-lg"></i></a>
+    </div>
+</nav>
+<div class="page-bg d-flex align-items-center min-vh-100 mModalContent">
+    <div class="container-fluid">
+        <div class="col-sm-4 offset-sm-4">
+            <div class="text-center">
+                <h3>Prisijungimas</h3>
+            </div>
+            <form th:action="@{/login}" method="post">
+                <!-- Email input -->
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="username">Vartotojo vardas</label>
+                    <input type="text" id="username" name="username" class="form-control" required/>
+
+                </div>
+
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="password">Slaptažodis</label>
+                    <input type="password" id="password" name="password" class="form-control" required/>
+                </div>
+
+                <div th:if="${param.error}">
+                    <p class="text-danger text-center">Neteisingi prisijungimo duomenys!</p>
+                </div>
+
+                <div th:if="${param.success}">
+                    <p class="text-success text-center">Registracija sėkminga! Galite prisijungti</p>
+                </div>
+
+                <!-- Submit button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary mb-4">Prisijungti</button>
+                </div>
+            </form>
+
+            <div class="text-center">
+                <a th:href="registration">Registruotis</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{main.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+</html>
